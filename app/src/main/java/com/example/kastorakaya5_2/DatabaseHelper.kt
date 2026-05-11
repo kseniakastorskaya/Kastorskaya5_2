@@ -34,7 +34,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         onCreate(db)
     }
 
-    // Добавление новой книги
     fun addBook(book: Book): Boolean {
         val db = this.writableDatabase
         val values = ContentValues().apply {
@@ -48,7 +47,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result != -1L
     }
 
-    // Поиск книги по ID
     fun findBook(id: Int): Book? {
         val db = this.readableDatabase
         var cursor: Cursor? = null
@@ -76,7 +74,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return null
     }
 
-    // Получение всех книг
     fun getAllBooks(): List<Book> {
         val books = mutableListOf<Book>()
         val db = this.readableDatabase
@@ -102,7 +99,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return books
     }
 
-    // Обновление данных книги
     fun updateBook(id: Int, newBook: Book): Boolean {
         val db = this.writableDatabase
         val values = ContentValues().apply {
@@ -116,7 +112,6 @@ class DatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_NAME
         return result > 0
     }
 
-    // Удаление книги по ID
     fun deleteBook(id: Int): Boolean {
         val db = this.writableDatabase
         val result = db.delete(TABLE_BOOKS, "$COLUMN_ID = ?", arrayOf(id.toString()))
