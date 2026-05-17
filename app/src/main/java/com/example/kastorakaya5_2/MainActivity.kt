@@ -2,16 +2,12 @@ package com.example.kastorakaya5_2
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-
 
 class MainActivity : AppCompatActivity() {
 
@@ -25,16 +21,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bookGenreEditText: EditText
     private lateinit var bookYearEditText: EditText
 
+    companion object {
+        private const val PREFS_NAME = "app_settings"
+        private const val KEY_USERNAME = "username"
+        private const val DEFAULT_USERNAME = "Гость"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
 
-        sharedPreferences = getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+        sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
         dbHelper = DatabaseHelper(this)
 
         resultTextView = findViewById(R.id.resultTextView)
@@ -45,18 +43,22 @@ class MainActivity : AppCompatActivity() {
         bookGenreEditText = findViewById(R.id.bookGenreEditText)
         bookYearEditText = findViewById(R.id.bookYearEditText)
 
-        loadUsername()
+        val savedUsername = loadUsername()
+        usernameEditText.setText(savedUsername)
+        resultTextView.text = "Добро пожаловать, $savedUsername!"
 
         findViewById<Button>(R.id.saveUsernameButton).setOnClickListener {
             val username = usernameEditText.text.toString()
             if (username.isNotEmpty()) {
-                sharedPreferences.edit().putString("username", username).apply()
+                saveUsername(username)
                 Toast.makeText(this, "Имя пользователя сохранено", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Введите имя", Toast.LENGTH_SHORT).show()
             }
         }
 
         findViewById<Button>(R.id.deleteUsernameButton).setOnClickListener {
-            sharedPreferences.edit().remove("username").apply()
+            deleteUsername()
             usernameEditText.setText("")
             Toast.makeText(this, "Имя пользователя удалено", Toast.LENGTH_SHORT).show()
         }
@@ -82,10 +84,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadUsername() {
-        val username = sharedPreferences.getString("username", "Гость")
-        usernameEditText.setText(username)
-        resultTextView.text = "Добро пожаловать, $username!"
+    private fun saveUsername(username: String): Boolean {
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        editor.putString(KEY_USERNAME, username)
+        return editor.commit()
+    }
+
+    private fun loadUsername(): String {
+        return sharedPreferences.getString(KEY_USERNAME, DEFAULT_USERNAME) ?: DEFAULT_USERNAME
+    }
+
+    private fun updateUsername(newUsername: String): Boolean {
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        editor.putString(KEY_USERNAME, newUsername)
+        return editor.commit()
+    }
+
+    private fun deleteUsername(): Boolean {
+        val editor: SharedPreferences.Editor = sharedPreferences.edit()
+        editor.remove(KEY_USERNAME)
+        return editor.commit()
     }
 
     private fun addBook() {
@@ -102,6 +120,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Ошибка добавления", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Заполните название и автора", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -118,6 +138,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Книга не найдена", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Введите ID книги", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -135,6 +157,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Книга с ID=$id не найдена", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Введите ID книги", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -147,6 +171,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Книга с ID=$id не найдена", Toast.LENGTH_SHORT).show()
             }
+        } else {
+            Toast.makeText(this, "Введите ID книги", Toast.LENGTH_SHORT).show()
         }
     }
 
